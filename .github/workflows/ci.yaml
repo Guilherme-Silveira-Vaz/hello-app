@@ -7,7 +7,6 @@ on:
 
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/hello-app
-  TAG: v${{ github.run_number }}
 
 jobs:
   build-and-deploy:
@@ -26,11 +25,6 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and push Docker image
-      run: |
-        docker build -t $IMAGE_NAME:$TAG .
-        docker push $IMAGE_NAME:$TAG
-
     - name: Setup SSH for manifests repo
       uses: webfactory/ssh-agent@v0.9.1
       with:
@@ -39,12 +33,25 @@ jobs:
     - name: Clone manifests repo
       run: git clone git@github.com:Guilherme-Silveira-Vaz/manifests-ci-cd.git
 
+    - name: Increment image version
+      run: |
+        cd manifests-ci-cd
+        LAST=$(cat VERSION)
+        NEW=$((LAST + 1))
+        echo "TAG=v$NEW" >> $GITHUB_ENV
+        echo "$NEW" > VERSION
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t $IMAGE_NAME:$TAG .
+        docker push $IMAGE_NAME:$TAG
+
     - name: Update deployment image
       run: |
         cd manifests-ci-cd
         sed -i "s|image: .*|image: $IMAGE_NAME:$TAG|" deployment.yaml
         git config user.name "github-actions"
         git config user.email "actions@github.com"
-        git add deployment.yaml
+        git add deployment.yaml VERSION
         git commit -m "Update image to $TAG"
         git push origin main
