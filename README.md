@@ -88,7 +88,7 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
 
 - CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--reload"] : o terminal do container vai rodar o pacote uvicorn (fastAPI) no arquivo main:app, e vai disponibilizar o serviço na porta 80 para sincronizar futuramente com a máquina, e o reload garantirá que toda vez que o arquivo main.py do fastAPI for alterado, o pacote irá recarregar a aplicação.
 
-![dockerfile](img/arquivo-docker.png)
+![dockerFile](img/filedocker.png?raw=true)
 
 Agora podemos **SUBIR OS ARQUIVOS PARA O REPOSITÓRIO hello-app** no GitHub, não se preocupe com o arquivo **ci.yaml** por enquanto, vamos popular ele mais tarde!
 
@@ -141,13 +141,13 @@ Primeiramente precisamos armazenar as credenciais de login do DockerHub onde sub
 
 Estando conectado no DockerHub, clique em **Perfil** -> **Account Settings** -> **Personal access tokens** -> **Generate new token** -> **Access permissions** -> **Read, Write, Delete** -> **Generate**
 
-![dockerhub-token](img/token-docker-hub.png)
+![dockerhubToken](img/tokenDockerHhub.png?raw=true)
 
 Agora copie o Token e vamos utilizar como value em um Secrets de senha no repositório do Github.
 
 De volta ao seu repositório **hello-app** do GitHub, clique na aba **Settings** (do próprio repositório) -> **Secrets and variables** -> **Actions** -> **Secrets** -> **New repository secret**
 
-![secrets-github](img/secrets-github.png)
+![secretsGithub](img/secretsGithub.png?raw=true)
 
 Primeiro crie esses dois secrets com as credenciais de login do DockerHub:
 
@@ -175,12 +175,12 @@ cat id_ed25519_nomeChave
 
 Copie o valor do output do comando cat chave.pub, vá no seu repositório do **manifests-ci-cd** -> **Settings** -> **Deploy keys** -> **Add deploy key** -> **Title**: nome descritivo -> **Key**: cole o valor do output da chave.pub -> **SELECIONE "Allow write access"** -> **Add key**
 
-![deploy-key](img/deploy-keys-github.png)
+![deployKey](img/deployKey.png?raw=true)
 
 Agora vamos armazenar o valor da outra chave sem extensão .pub nos **Secrets** do repositório **hello-app**.
 De volta ao seu repositório hello-app do GitHub, clique na aba **Settings** (do próprio repositório) -> **Secrets and variables** -> **Actions** -> **Secrets** -> **New repository secret**:
 
-![key-ssh](img/key-ssh-cicd.png)
+![keySsh](img/keySSHCICD.png?raw=true)
 
 - Name: **SSH_PRIVATE_KEY** -> **Secret**: valor do output do comando cat id_ed25519_nomeChave (copie até mesmo as linhas ---OPEN--- e ---END---) -> **Add secret**
 
@@ -324,11 +324,11 @@ Depois de ter os dois repositórios prontos com o push, o workflow já irá disp
 
 Espere o workflow realizar todas as etapas:
 
-![workflow-complete](img/workflow-github.png)
+![workflowComplete](img/workflowGithub.png?raw=true)
 
 Agora que o workflow foi executado, a imagem deve aparecer no seu repositório dockerHub:
 
-![docker-registry](img/docker-hub.png)
+![dockerRegistry](img/dockerHub.png?raw=true)
 
 Adicione uma descrição da imagem -> **Add a description** no topo do repositório -> Abaixo do quadro da imagem do repositório edite o overwiew, que vai servir como descrição do que a imagem faz -> **Repository overview** -> **Edit**
 
@@ -357,7 +357,7 @@ Primeiramente em um novo terminal em paralelo, realize o port-forward para habil
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
-![port-forward-argocd](img/port-forward-argocd.png)
+![portForwardArgocd](img/portForwardArgoCD.png?raw=true)
 
 Depois abra o navegador e digite na URL: http://localhost:8080
 
@@ -370,13 +370,13 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 Como pegar a senha no rancher:
 
-![rancher-secret-1](img/rancher1.png)
+![rancherSecret1](img/rancher.png?raw=true)
 
-![rancher-secret-2](img/rancher2.png)
+![rancherSecret2](img/rancher2o.png?raw=true)
 
 Depois de conectar no ArgoCD, precisamos armazenar o repositório **manifests-ci-cd** com a chave SSH privada que geramos anteriormente para o ArgoCD conseguir monitorar o repositório. Clique em **Settings** -> **CONNECT REPO**:
 
-![repo-argocd](img/connect-repo-ssh.png)
+![repoArgocd](img/connectRepoSsh.png?raw=true)
 
 - **Choose your connection method**: **VIA SSH**
 - **Project**: Selecione **default**
@@ -389,8 +389,8 @@ Clique em Connect após inserir os dados, e agora podemos criar a aplicação co
 
 Agora clique em **Applications** -> **NEW APP**:
 
-![create-app1](img/create-app-argocd.png)
-![create-app2](img/create-app-argocd-2.png)
+![createApp1](img/createAppArgoCD.png?raw=true)
+![createApp2](img/createAppArgoCD2.png?raw=true)
 
 - **Application Name**: hello-app
 - **Project Name**: selecione o default
@@ -403,7 +403,7 @@ Agora clique em **Applications** -> **NEW APP**:
 
 Depois clique em **CREATE** e a aplicação já deve estar disponível!
 
-![app-argocd](img/app-argocd.png)
+![appArgocd](img/appArgoCD.png?raw=true)
 
 Espere alguns minutos e verifique se o pod e o service da aplicação foram criados no namespace hello-app-ci:
 
@@ -423,15 +423,15 @@ kubectl port-forward svc/hello-app-service -n hello-app-ci 8081:8080
 
 Agora podemos acessar a URL e verificar que a aplicação está funcionando: http://localhost:8081
 
-![testing-app](img/port-forward-fastapi-service.png)
+![testingApp](img/portForwardFastApiService.png?raw=true)
 
 Agora para verificar se a aplicação está com a automação CI/CD basta ir no repositório **hello-app** e alterar a mensagem do arquivo main.py por exemplo:
 
-![change-mainpy](img/testando-alteracao-mainpy.png)
+![changeMainpy](img/testandoAlteracaoMainpy.png?raw=true)
 
 Depois de commitar a alteração, vá na aba **actions** e execute o **run workflow** novamente para o GitHub Actions buildar a nova imagem da aplicação alterada no dockerHub. Depois do Workflow ser executado o repositório do dockerHub deve ter a imagem da nova aplicação em uma nova versão:
 
-![docker-registry2](img/docker-hub-2.png)
+![dockerRegistry2](img/dockerHub2.png?raw=true)
 
 O ArgoCD vai ser encarregado de monitorar o repositório que está com a alteração da nova imagem e lançar os pods da aplicação nova automaticamente.
 
@@ -444,7 +444,7 @@ Agora os pods/containers estão criados e sincronizados com a imagem que buildam
 
 Podemos também verificar os logs do pod da aplicação, assim como realizar um curl para verificar se o conteúdo da aplicação mudou como desejado:
 
-![logs-pod](img/logs-pod.png)
+![logsPod](img/logsPod.png?raw=true)
 
 Agora temos a aplicação completa com o build da imagem e a alteração no repositório dos manifestos e no cluster Kubernetes de forma automatizada utilizando de ferramentas em alta no mercado DevOps!
 
