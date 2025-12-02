@@ -9,4 +9,4 @@ COPY . .
 ARG APP_VERSION=unknown
 ENV APP_VERSION=${APP_VERSION}
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"] 
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--reload"] 
